@@ -1,8 +1,8 @@
 package dockertest
 
 import (
-	"camlistore.org/pkg/netutil"
 	"fmt"
+	"net"
 	"os/exec"
 	"strings"
 	"time"
@@ -55,6 +55,23 @@ func (c ContainerID) lookup(port int, timeout time.Duration) (ip string, err err
 		return
 	}
 	addr := fmt.Sprintf("%s:%d", ip, port)
-	err = netutil.AwaitReachable(addr, timeout)
+	err = AwaitReachable(addr, timeout)
 	return
+}
+
+// From http://camlistore.org/pkg/netutil#AwaitReachable
+
+// AwaitReachable tries to make a TCP connection to addr regularly.
+// It returns an error if it's unable to make a connection before maxWait.
+func AwaitReachable(addr string, maxWait time.Duration) error {
+	done := time.Now().Add(maxWait)
+	for time.Now().Before(done) {
+		c, err := net.Dial("tcp", addr)
+		if err == nil {
+			c.Close()
+			return nil
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return fmt.Errorf("%v unreachable for %v", addr, maxWait)
 }
