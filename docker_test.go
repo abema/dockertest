@@ -5,13 +5,22 @@ import (
 	"testing"
 )
 
+func TestMySQLContainer(t *testing.T) {
+	con, ip, port, err := SetupMySQLContainer()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer con.KillRemove()
+	log.Printf("tcp://%s:%d", ip, port)
+}
+
 func TestMongoDBContainer(t *testing.T) {
 	con, ip, port, err := SetupMongoContainer()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer con.KillRemove()
-	log.Printf("mongodb://%s:%d/abema", ip, port)
+	log.Printf("mongodb://%s:%d", ip, port)
 }
 
 func TestRedisConatiner(t *testing.T) {

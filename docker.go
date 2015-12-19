@@ -193,30 +193,14 @@ func SetupMongoContainer() (c ContainerID, ip string, port int, err error) {
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
 func SetupMySQLContainer() (c ContainerID, ip string, port int, err error) {
-	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 3306)
-	if BindDockerToLocalhost != "" {
-		forward = "127.0.0.1:" + forward
-	}
-	c, ip, err = setupContainer(mysqlImage, port, 10*time.Second, func() (string, error) {
-		return run("-d", "-p", forward, "-e", fmt.Sprintf("MYSQL_ROOT_PASSWORD=%s", MySQLPassword), mysqlImage)
-	})
-	return
+	return SetupContainerWithEnv(mysqlImage, 3306, fmt.Sprintf("MYSQL_ROOT_PASSWORD=%s", MySQLPassword))
 }
 
 // SetupPostgreSQLContainer sets up a real PostgreSQL instance for testing purposes,
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
 func SetupPostgreSQLContainer() (c ContainerID, ip string, port int, err error) {
-	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 5432)
-	if BindDockerToLocalhost != "" {
-		forward = "127.0.0.1:" + forward
-	}
-	c, ip, err = setupContainer(postgresImage, port, 15*time.Second, func() (string, error) {
-		return run("-d", "-p", forward, "-e", fmt.Sprintf("POSTGRES_PASSWORD=%s", PostgresPassword), postgresImage)
-	})
-	return
+	return SetupContainerWithEnv(postgresImage, 5432, fmt.Sprintf("POSTGRES_PASSWORD=%s", PostgresPassword))
 }
 
 // SetupElasticSearchContainer sets up a real ElasticSearch instance for testing purposes
@@ -247,6 +231,11 @@ func SetupFluentdContainer() (c ContainerID, ip string, port int, err error) {
 
 // SetupContainer runs docker instance and returns port.
 func SetupContainer(image string, containerPort int, args ...string) (c ContainerID, ip string, port int, err error) {
+	return SetupContainerWithEnv(image, containerPort, "", args...)
+}
+
+// SetupContainerWithEnv runs docker instance with env variable and returns port.
+func SetupContainerWithEnv(image string, containerPort int, env string, args ...string) (c ContainerID, ip string, port int, err error) {
 	log.Printf("setup container %s", image)
 	port = randInt(1024, 49150)
 	forward := fmt.Sprintf("%d:%d", port, containerPort)
@@ -255,7 +244,11 @@ func SetupContainer(image string, containerPort int, args ...string) (c Containe
 	}
 	c, ip, err = setupContainer(image, port, 15*time.Second, func() (string, error) {
 
-		rargs := []string{"--name", uuid.New(), "-d", "-P", "-p", forward, image}
+		rargs := []string{"--name", uuid.New(), "-d", "-P", "-p", forward}
+		if env != "" {
+			rargs = append(rargs, "-e", env)
+		}
+		rargs = append(rargs, image)
 		rargs = append(rargs, args...)
 		return run(rargs...)
 	})
