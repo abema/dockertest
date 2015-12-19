@@ -257,3 +257,17 @@ func SetupRedisContainer() (c ContainerID, ip string, port int, err error) {
 	})
 	return
 }
+
+// SetupNatsContainer sets up a real natsd instance for testing purposes
+// using Docker container.
+func SetupNatsContainer() (c ContainerID, ip string, port int, err error) {
+	port = randInt(1024, 49150)
+	forward := fmt.Sprintf("%d:%d", port, 4222)
+	if BindDockerToLocalhost != "" {
+		forward = "127.0.0.1:" + forward
+	}
+	c, ip, err = setupContainer(natsImage, port, 15*time.Second, func() (string, error) {
+		return run("--name", uuid.New(), "-d", "-P", "-p", forward, natsImage)
+	})
+	return
+}

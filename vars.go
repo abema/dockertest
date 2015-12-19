@@ -25,6 +25,7 @@ const (
 	postgresImage      = "postgres"
 	elasticsearchImage = "elasticsearch"
 	redisImage         = "redis"
+	natsImage          = "nats"
 
 	// MySQLUsername must be passed as username when connecting to mysql
 	MySQLUsername = "root"
