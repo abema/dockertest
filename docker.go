@@ -186,16 +186,7 @@ func randInt(min int, max int) int {
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
 func SetupMongoContainer() (c ContainerID, ip string, port int, err error) {
-	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 27017)
-	if BindDockerToLocalhost != "" {
-		forward = "127.0.0.1:" + forward
-	}
-	c, ip, err = setupContainer(mongoImage, port, 10*time.Second, func() (string, error) {
-		res, err := run("--name", uuid.New(), "-d", "-P", "-p", forward, mongoImage)
-		return res, err
-	})
-	return
+	return SetupContainer(mongoImage, 27017)
 }
 
 // SetupMySQLContainer sets up a real MySQL instance for testing purposes,
@@ -232,42 +223,38 @@ func SetupPostgreSQLContainer() (c ContainerID, ip string, port int, err error) 
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
 func SetupElasticSearchContainer() (c ContainerID, ip string, port int, err error) {
-	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 9200)
-	if BindDockerToLocalhost != "" {
-		forward = "127.0.0.1:" + forward
-	}
-	c, ip, err = setupContainer(elasticsearchImage, port, 15*time.Second, func() (string, error) {
-		return run("--name", uuid.New(), "-d", "-P", "-p", forward, elasticsearchImage)
-	})
-	return
+	return SetupContainer(elasticsearchImage, 9200)
 }
 
 // SetupRedisContainer sets up a real Redis instance for testing purposes
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
 func SetupRedisContainer() (c ContainerID, ip string, port int, err error) {
-	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 6379)
-	if BindDockerToLocalhost != "" {
-		forward = "127.0.0.1:" + forward
-	}
-	c, ip, err = setupContainer(redisImage, port, 15*time.Second, func() (string, error) {
-		return run("--name", uuid.New(), "-d", "-P", "-p", forward, redisImage)
-	})
-	return
+	return SetupContainer(redisImage, 6379)
 }
 
 // SetupNatsContainer sets up a real natsd instance for testing purposes
 // using Docker container.
 func SetupNatsContainer() (c ContainerID, ip string, port int, err error) {
+	return SetupContainer(natsImage, 4222)
+}
+
+// SetupFluentdContainer sets up a real natsd instance for testing purposes
+// using Docker container.
+func SetupFluentdContainer() (c ContainerID, ip string, port int, err error) {
+	return SetupContainer(fluentdImage, 24224)
+}
+
+// SetupContainer runs docker instance and returns port.
+func SetupContainer(image string, containerPort int) (c ContainerID, ip string, port int, err error) {
+	log.Printf("setup container %s", image)
 	port = randInt(1024, 49150)
-	forward := fmt.Sprintf("%d:%d", port, 4222)
+	forward := fmt.Sprintf("%d:%d", port, containerPort)
 	if BindDockerToLocalhost != "" {
 		forward = "127.0.0.1:" + forward
 	}
-	c, ip, err = setupContainer(natsImage, port, 15*time.Second, func() (string, error) {
-		return run("--name", uuid.New(), "-d", "-P", "-p", forward, natsImage)
+	c, ip, err = setupContainer(image, port, 15*time.Second, func() (string, error) {
+		return run("--name", uuid.New(), "-d", "-P", "-p", forward, image)
 	})
 	return
 }

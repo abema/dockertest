@@ -26,6 +26,7 @@ const (
 	elasticsearchImage = "elasticsearch"
 	redisImage         = "redis"
 	natsImage          = "nats"
+	fluentdImage       = "fluent/fluentd"
 
 	// MySQLUsername must be passed as username when connecting to mysql
 	MySQLUsername = "root"
