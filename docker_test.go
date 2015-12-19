@@ -17,7 +17,7 @@ func TestMongoDBContainer(t *testing.T) {
 func TestRedisConatiner(t *testing.T) {
 	con, ip, port, err := SetupRedisContainer()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	defer con.KillRemove()
 	log.Printf("%s:%d", ip, port)
@@ -26,7 +26,7 @@ func TestRedisConatiner(t *testing.T) {
 func TestNatsContainer(t *testing.T) {
 	con, ip, port, err := SetupNatsContainer()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	defer con.KillRemove()
 	log.Printf("%s:%d", ip, port)
@@ -35,7 +35,16 @@ func TestNatsContainer(t *testing.T) {
 func TestFluentdContainer(t *testing.T) {
 	con, ip, port, err := SetupFluentdContainer()
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
+	}
+	defer con.KillRemove()
+	log.Printf("%s:%d", ip, port)
+}
+
+func TestContainerWithArgs(t *testing.T) {
+	con, ip, port, err := SetupContainer("nats", 4333, "-p", "4333")
+	if err != nil {
+		t.Fatal(err)
 	}
 	defer con.KillRemove()
 	log.Printf("%s:%d", ip, port)

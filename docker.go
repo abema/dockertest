@@ -246,7 +246,7 @@ func SetupFluentdContainer() (c ContainerID, ip string, port int, err error) {
 }
 
 // SetupContainer runs docker instance and returns port.
-func SetupContainer(image string, containerPort int) (c ContainerID, ip string, port int, err error) {
+func SetupContainer(image string, containerPort int, args ...string) (c ContainerID, ip string, port int, err error) {
 	log.Printf("setup container %s", image)
 	port = randInt(1024, 49150)
 	forward := fmt.Sprintf("%d:%d", port, containerPort)
@@ -254,7 +254,10 @@ func SetupContainer(image string, containerPort int) (c ContainerID, ip string, 
 		forward = "127.0.0.1:" + forward
 	}
 	c, ip, err = setupContainer(image, port, 15*time.Second, func() (string, error) {
-		return run("--name", uuid.New(), "-d", "-P", "-p", forward, image)
+
+		rargs := []string{"--name", uuid.New(), "-d", "-P", "-p", forward, image}
+		rargs = append(rargs, args...)
+		return run(rargs...)
 	})
 	return
 }
