@@ -185,22 +185,22 @@ func randInt(min int, max int) int {
 // SetupMongoContainer sets up a real MongoDB instance for testing purposes,
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
-func SetupMongoContainer() (c ContainerID, ip string, port int, err error) {
-	return SetupContainer(mongoImage, 27017)
+func SetupMongoContainer(args ...string) (c ContainerID, ip string, port int, err error) {
+	return SetupContainer(mongoImage, 27017, args...)
 }
 
 // SetupMySQLContainer sets up a real MySQL instance for testing purposes,
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
-func SetupMySQLContainer() (c ContainerID, ip string, port int, err error) {
-	return SetupContainerWithEnv(mysqlImage, 3306, fmt.Sprintf("MYSQL_ROOT_PASSWORD=%s", MySQLPassword))
+func SetupMySQLContainer(args ...string) (c ContainerID, ip string, port int, err error) {
+	return SetupContainerWithEnv(mysqlImage, 3306, fmt.Sprintf("MYSQL_ROOT_PASSWORD=%s", MySQLPassword), args...)
 }
 
 // SetupPostgreSQLContainer sets up a real PostgreSQL instance for testing purposes,
 // using a Docker container. It returns the container ID and its IP address,
 // or makes the test fail on error.
-func SetupPostgreSQLContainer() (c ContainerID, ip string, port int, err error) {
-	return SetupContainerWithEnv(postgresImage, 5432, fmt.Sprintf("POSTGRES_PASSWORD=%s", PostgresPassword))
+func SetupPostgreSQLContainer(args ...string) (c ContainerID, ip string, port int, err error) {
+	return SetupContainerWithEnv(postgresImage, 5432, fmt.Sprintf("POSTGRES_PASSWORD=%s", PostgresPassword), args...)
 }
 
 // SetupElasticSearchContainer sets up a real ElasticSearch instance for testing purposes
