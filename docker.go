@@ -242,7 +242,7 @@ func SetupContainerWithEnv(image string, containerPort int, env string, args ...
 	if BindDockerToLocalhost != "" {
 		forward = "127.0.0.1:" + forward
 	}
-	c, ip, err = setupContainer(image, port, 15*time.Second, func() (string, error) {
+	c, ip, err = setupContainer(image, port, 60*time.Second, func() (string, error) {
 
 		rargs := []string{"--name", uuid.New(), "-d", "-P", "-p", forward}
 		if env != "" {
